@@ -1,0 +1,244 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>William Lord Programming Portfolio</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+								<header id="header">
+									<a href="index.html" class="logo"><strong>William Lord</strong> | Programming Portfolio</a>
+									<ul class="icons">
+										<li><a href="https://github.com/wdlord"target="_blank" class="icon brands fa-github"><span class="label">Github</span></a></li>
+									</ul>
+								</header>
+
+							<!-- Banner -->
+								<section id="banner">
+									<div class="content">
+										<header>
+											<h1>Rainy Day Bot</h1>
+											<p>Made in Python</p>
+										</header>
+										<p>
+											The idea for the Rainy Day Bot came one day when I stepped outside to longboard to class only to discover that it was raining.
+											It wouldn't be very safe to longboard to class in the rain, but I hadn't thought to check because of how rarely it rains in Arizona.
+											If only I could know the night before whether or not it would rain without checking the forecast every day... 
+											My Rainy Day Bot scrapes the national weather service website for the forecast in my area every night, and sends me a text if the forecast for the next day contains the words "rain" or "shower" so that I can avoid being late to class.
+										</p>
+										<ul class="actions">
+											<li><a href="https://github.com/wdlord/Rainy-Day-Bot"target="_blank" class="button big">View the code on Github</a></li>
+										</ul>
+									</div>
+									<span class="image object">
+										<img src="images/rain2.jpg" alt="" />
+									</span>
+								</section>
+
+							
+							<!-- Section -->
+							<div id="projects">
+								<section>
+									<header class="major">
+										<h2>About the Project</h2>
+									</header>
+									<div class="content">
+										<p>
+											This project is a pretty small one, but it's something that I still run because of how useful it is to me. 
+											In the future I may upgrade this project by turning it into an app so it works off of phone location, but even in its current state it provides me a lot of utility.
+											The code is pretty short and pretty straight forward. We start by setting the website link for the city we want to monitor, <a href="https://forecast.weather.gov/MapClick.php?lat=33.4255&lon=-111.9372"target="_blank">this</a> is the area for my university.
+										</p>
+										<p>
+											Next we download the HTML content into an object and use a parser to split it into elements, I did this with the BeautifulSoup4 Python module.
+											From here we find the 7 day forecast item, and move along its elements until we reach the one for tomorrow.
+										</p>
+										<br>
+										<span class="image object">
+											<img src="images/forecast.JPG" alt="" />
+										</span>
+										<br>
+
+<!-- Preformatted Code -->
+<pre><code>
+# get the list of forecast items
+seven_day = soup.find(id="seven-day-forecast")
+forecast_items = seven_day.find_all(class_="tombstone-container")
+
+# move along until we find the correct item
+for element in forecast_items:
+
+	# get short description for the forecast
+	period = element.find(class_="period-name").get_text()
+	short_desc = element.find(class_="short-desc").get_text()
+
+	# break if the item is the one we want
+	if (short_desc != "Excessive Heat Warning") and (period != "Tonight"):
+		break
+</code></pre>
+<br>
+	
+
+										<p>
+											Once we've found the correct element, I extract the full forecast. 
+											This is a string that contains some unwanted information, so I manullay parse it for the forecast description.
+											The description lies within the first pair of quotation marks, so I use the following code to extract it.
+										</p>
+										<br>
+
+										<!-- Preformatted Code -->
+									<pre><code>
+# REFORMAT DESCRIPTION
+# ---------------------
+forecast = ""
+quotes = 0
+
+# the description we want is between quotes, this extracts it
+for char in str(description):
+
+	if quotes == 2:
+		break
+
+	if char == "\"":
+		quotes += 1
+
+	elif quotes == 1:
+		forecast += char
+</code></pre>
+<br>
+
+										<p>
+											From here, all that I need to do is send a text message if there is a chance of rain.
+											Doing this involves making a MIME Multipart message and using smtplib to run an email server from my computer.
+										</p>
+										<!-- Preformatted Code -->
+									<pre><code>
+if ("rain" in forecast) or ("shower" in forecast):
+
+	# used soon to login to server
+	email = "email goes here"
+	password = "password goes here"
+
+	# this is for t-mobile, different carriers use something different
+	sms_gateway = 'phonenumberhere@tmomail.net'
+
+	# server for sending text over email
+	smtp = "smtp.gmail.com"
+	port = 587
+
+	# start server and login
+	server = smtplib.SMTP(smtp, port)
+	server.starttls()
+	server.login(email, password)
+
+	# prepare mail fields
+	message = MIMEMultipart()
+	message['From'] = email
+	message['To'] = sms_gateway
+
+	# subject line and body
+	message['Subject'] = "FORECAST \n"
+	body = forecast + "\n"
+
+	# we're just sending plain text, attach it to message
+	message.attach(MIMEText(body, 'plain'))
+
+	# send the text over email
+	server.sendmail(email, sms_gateway, message.as_string())
+
+	# quit the server
+	server.quit()
+										</code></pre>
+										<br>
+
+										<p>
+											There you have it, in just a few steps I was able to get the forecast from the national weather service and send it to myself over text.
+											I created a .bat file to run this program, and I use the Windows Task Scheduler to run it at the same time every night.
+											If you would like to view the entire code, check it out on Github <a href="https://github.com/wdlord/Rainy-Day-Bot"target="_blank">here</a>.
+											You can see a screenshot of my messages from the bot below.
+										</p>
+										
+										<br>
+										<span class="image object">
+											<img src="images/forecastText.jpg" width= "370" heigh= "480" alt="" />
+										</span>
+										<br>
+									</div>
+
+								</section>
+							</div>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+				<div id="sidebar">
+					<div class="inner">
+
+						<!-- Menu -->
+							<nav id="menu">
+								<header class="major">
+									<h2>Menu</h2>
+								</header>
+								<ul>
+									<li><a href="index.html">Homepage</a></li>
+									<li>
+										<span class="opener">Projects</span>
+										<ul>
+											<li><a href="teleportPanic.html">Teleport Panic</a></li>
+											<li><a href="instaUploader.html">Drive to Instagram Uploader</a></li>
+											<li><a href="honorsProject.html">University Honors Project</a></li>
+											<li><a href="rainyDay.html">Rainy Day Bot</a></li>
+										</ul>
+									</li>
+								</ul>
+							</nav>
+
+						
+
+						<!-- Section -->
+							<section>
+								<header class="major">
+									<h2>Get in touch</h2>
+								</header>
+								<p>
+									The best way to get in touch with me is by sending me an email at the address shown below, or if you have my resume the address listed there works fine as well.
+								</p>
+								<ul class="contact">
+									<li class="icon solid fa-envelope"><a href="mailto:wdlordcontact@gmail.com">wdlordcontact@gmail.com</a></li>
+								</ul>
+							</section>
+
+						<!-- Footer -->
+							<footer id="footer">
+								<p class="copyright">&copy; Untitled. All rights reserved. Demo Images: <a href="https://unsplash.com">Unsplash</a>. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+							</footer>
+
+					</div>
+				</div>
+
+		</div>
+
+	<!-- Scripts -->
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
+
+</body>
+</html>

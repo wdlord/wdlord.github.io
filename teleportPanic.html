@@ -1,0 +1,220 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>William Lord Programming Portfolio</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+								<header id="header">
+									<a href="index.html" class="logo"><strong>William Lord</strong> | Programming Portfolio</a>
+									<ul class="icons">
+										<li><a href="https://github.com/wdlord"target="_blank" class="icon brands fa-github"><span class="label">Github</span></a></li>
+									</ul>
+								</header>
+
+							<!-- Banner -->
+								<section id="banner">
+									<div class="content">
+										<header>
+											<h1>Teleport Panic</h1>
+											<p>Made with GML in GameMaker Studio 2</p>
+										</header>
+										<p>In Teleport Panic, every floor has three rooms which are randomly mapped to the three rooms on the next level down. Once the mapping is revealed, you only have a few seconds to reposition before all the players are teleported to the next floor. Avoid hazards like lava and mud, push other players out of your way, and try not to teleport into a wall!</p>
+										<ul class="actions">
+											<li><a href="https://youtu.be/odsIAXXolEE"target="_blank" class="button big">Watch video demo</a></li>
+											<li><a href="https://github.com/wdlord/Teleport-Panic"target="_blank" class="button big">View the Code on Github</a></li>
+										</ul>
+									</div>
+									<span class="image object">
+										<img src="images/teleportPanic2.jpg" alt="" />
+									</span>
+								</section>
+
+							
+							<!-- Section -->
+							<div id="projects">
+								<section>
+									<header class="major">
+										<h2>About the Project</h2>
+									</header>
+									<div class="content">
+										<p>
+											Players can host a game or join an existing game. 
+											When the host chooses to start the game players are loaded into the map. 
+											Each floor of the map consists of three small rooms that are mapped to the three rooms on the next level down.
+											The players are shown the mapping and given a small amount of time to race to the room they want.
+											The players can shove each other around to make the game more difficult for each other.
+											The players can be killed by falling in lava or teleporting into a wall or a statue.
+											The game is won when one player remains, or when someone touches the trophy on the bottom floor.
+											To view a brief video demonstration, just click <a href="https://youtu.be/odsIAXXolEE"target="_blank">here</a>.
+										</p>
+										<p>
+											When I first decided to make this project a multiplayer game, I had no idea how complex multiplayer would be to implement. 
+											Throughout the course of building this project, I went through many iterations of many components, and I often had to spend hours building something only to realize it wasn't a good enough solution and have to rebuild it again from scratch.
+											 By far the most difficult component for me to design was the networking code for multiplayer movement.
+										</p>
+										<p>
+											After reading up on multiplayer movement, my first solution was to send the x and y coordinates of the players location to the server every tick.
+											 The problem with that approach was that the movement looked jittery/laggy because the player was teleporting short distances instead of just moving.
+											  From what I could tell, this problem is usually dealt with using interpolation, where other players are shown one tick behind and the clients smooth the movement inbetween.
+											  However, I came up with a different solution that would be both easier for me to implement and make the games identical across the entire lobby.
+										</p>
+										<p>
+											
+											 Instead of sending player locations to the server, I sent keyboard inputs.
+											  The server maintains a list of the last keyboard inputs it receives from all players, and every tick it sends that snapshot to all the clients.
+											   Each client then independently calculates the movement for every player.
+											    By doing this, all the clients identically simulate player movements, and the movement appears smooth because it's calculated like normal.
+										</p>
+										<br>
+									</div>
+									
+									<!-- Preformatted Code -->
+									<pre><code>
+// SERVER RECEIVING MOVEMENT INFO FROM ANY PLAYER
+case network.movement:
+
+	// READ DATA FROM BUFFER
+	var temp_id = buffer_read(buffer, buffer_u8);		// which player sent this info?
+	var jump = buffer_read(buffer, buffer_bool);		// is jump key pressed?
+	var left = buffer_read(buffer, buffer_bool);		// left movement key pressed?
+	var right = buffer_read(buffer, buffer_bool);		// right movement key pressed?
+	var shove = buffer_read(buffer, buffer_bool);		// shove key pressed?
+	var walk_dir = buffer_read(buffer, buffer_s8);		// which direction are they walking?
+
+	// WRITE DATA INTO movement_info STRUCTURE
+	var inputs = movement_info[| temp_id];
+	inputs[0] = jump;
+	inputs[1] = left;
+	inputs[2] = right;
+	inputs[3] = shove;
+	inputs[4] = walk_dir;
+	movement_info[| temp_id] = inputs;
+	
+	break;
+</code></pre>
+<br>
+									
+									<!-- Preformatted Code -->
+									<pre><code>
+// SENDING MOVEMENT INFO TO CLIENTS
+
+	// MARK THIS BUFFER AS MOVEMENT INFO
+	buffer_seek(server_buffer, buffer_seek_start, 0);
+	buffer_write(server_buffer, buffer_u8, network.movement);
+
+	var player_count = ds_list_size(obj_manager.player_list);
+
+	// LOAD ALL PLAYER MOVEMENT DATA INTO BUFFER
+	for (var i = 0; i < player_count; i++) {
+
+		var inputs = movement_info[| i];	// contains movement data for all the players
+		
+		// PUT ALL BOOLEANS INTO BUFFER
+		for (var j = 0; j < 4; j++) {
+			buffer_write(server_buffer, buffer_bool, inputs[j]);
+		}
+
+		// PUT walk_dir INTO BUFFER
+		buffer_write(server_buffer, buffer_s8, inputs[4]);
+	}
+
+	var buff_size = buffer_tell(server_buffer);	// needed when sending buffer over network
+		
+	// SEND THE BUFFER TO ALL PLAYERS IN THE NETWORK
+	for (var i = 0; i < ds_list_size(socket_list); i++) {
+		var temp_socket = ds_list_find_value(socket_list, i);
+		network_send_packet(temp_socket, server_buffer, buff_size);
+	}
+										</code></pre>
+										<br>
+										<div class="content">
+											<p>
+												Someone might be wondering, "Wouldn't the player then feel input lag if they have to wait for their movement info to be sent to the server and back?" Yes they would, which is why I designed an object I call the False Player.
+												Every time the keyboard inputs are sent to the server, they are also sent to the False Player, who reacts to them in real time.
+												The False Player cannot actually interact with other players and it's position is not sent to the server, it is purely used as an illusion to make the player feel like their movement is more responsive than it actually is.
+												I decided to leave both the Player object and the False Player visible so that this functionality could be observed. 
+												The Player object is the green square, and the False Player object is the red square.
+												Keep in mind that in implementation the Player (green square) would be made invisible client-side.
+											</p>
+											<iframe src="https://giphy.com/embed/KLbuhUYY9XeQvSwTpi" width="480" height="270" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p>This GIF clearly shows the two different player objects.</p>
+										</div>
+								</section>
+							</div>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+				<div id="sidebar">
+					<div class="inner">
+
+						<!-- Menu -->
+							<nav id="menu">
+								<header class="major">
+									<h2>Menu</h2>
+								</header>
+								<ul>
+									<li><a href="index.html">Homepage</a></li>
+									<li>
+										<span class="opener">Projects</span>
+										<ul>
+											<li><a href="teleportPanic.html">Teleport Panic</a></li>
+											<li><a href="instaUploader.html">Drive to Instagram Uploader</a></li>
+											<li><a href="honorsProject.html">University Honors Project</a></li>
+											<li><a href="rainyDay.html">Rainy Day Bot</a></li>
+										</ul>
+									</li>
+								</ul>
+							</nav>
+
+						
+
+						<!-- Section -->
+							<section>
+								<header class="major">
+									<h2>Get in touch</h2>
+								</header>
+								<p>
+									The best way to get in touch with me is by sending me an email at the address shown below, or if you have my resume the address listed there works fine as well.
+								</p>
+								<ul class="contact">
+									<li class="icon solid fa-envelope"><a href="mailto:wdlordcontact@gmail.com">wdlordcontact@gmail.com</a></li>
+								</ul>
+							</section>
+
+						<!-- Footer -->
+							<footer id="footer">
+								<p class="copyright">&copy; Untitled. All rights reserved. Demo Images: <a href="https://unsplash.com">Unsplash</a>. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+							</footer>
+
+					</div>
+				</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

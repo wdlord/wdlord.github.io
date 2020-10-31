@@ -1,0 +1,212 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>William Lord Programming Portfolio</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+								<header id="header">
+									<a href="index.html" class="logo"><strong>William Lord</strong> | Programming Portfolio</a>
+									<ul class="icons">
+										<li><a href="https://github.com/wdlord"target="_blank" class="icon brands fa-github"><span class="label">Github</span></a></li>
+									</ul>
+								</header>
+
+							<!-- Banner -->
+								<section id="banner">
+									<div class="content">
+										<header>
+											<h1>Drive to Instagram Uploader</h1>
+											<p>Made in Python with Drive API, Instabot</p>
+										</header>
+										<p>A year or so back I started a small e-commerce business with a friend. 
+											We quickly got bored with the monotony of trying to constantly curate instagram posts day in and day out, so as a solution I designed a Python script to do it for us!
+										</p>
+										<ul class="actions">
+											<li><a href="https://www.instagram.com/conservocean_/"target="_blank" class="button big">View the Instagram Account</a></li>
+											<li><a href="https://github.com/wdlord/drive-instagram-uploader"target="_blank" class="button big">View the Code on Github</a></li>
+										</ul>
+									</div>
+									<span class="image object">
+										<img src="images/conservocean2.JPG" alt="" />
+									</span>
+								</section>
+
+							
+							<!-- Section -->
+							<div id="projects">
+								<section>
+									<header class="major">
+										<h2>About the Project</h2>
+									</header>
+									<div class="content">
+										<p>
+											In this project I had to implement Google Drive file navigation, authentication, and uploading and downloading. 
+											I also created a serialized history and used the Windows Task Scheduler run the script.
+										</p>
+										<p>
+											The first version of the program did not utilize the Drive API, and combined random captions with random pictures. 
+											The problem with that was that it could sometimes produce awkward results depending on the contrast between the chosen image and the chosen caption. 
+											At that point, I knew I had to redesign the program.
+											This time around, I decided that the posts needed to be pre-curated. 
+											I also wanted the posts to exist on the cloud, so if something went wrong with my computer I wouldn't have to make a new set from scratch. 
+											After a bit of research I found out about the Drive API, which would allow me to access files from my google drive account using Python. 
+										</p>
+										<p>
+											I made a Google Drive account containing folders that each hold an image file and a Google Doc containing a caption. 
+											This is what one of the Google Drive Folders looks like.
+										</p>
+										<br>
+										<span class="image object">
+											<img src="images/DriveExample.JPG" alt="" />
+										</span>
+										<p>
+											The most difficult aspect of this project was learning how to use the Drive API. 
+											While the documentation for it is pretty good, certain features are not designed in the way that I would have expected. 
+											The primary example would be file navigation. Programming libraries for file navigation normally work off of folders/directories. 
+											If I wanted to access a text document on my computer's desktop, the directory for that would be something like "C:\Desktop\filename.txt". 
+											I could easily just tell Python to look in an exact location for a specific file.
+										</p>
+										<p>
+											The Google Drive API is nowhere near that straightforward. 
+											Instead, you have to repeatedly search through the database for data matching certain characteristics. 
+											Here are some examples; Note that these do not perform the search, these are used as just one component of the search command.
+										</p>
+										<br>
+									</div>
+									
+									<!-- Preformatted Code -->
+									<pre><code>
+# searching for a JPG image
+query = "mimeType='image/jpeg'"
+
+# searching for a folder
+query = "mimeType='application/vnd.google-apps.folder'"
+
+# searching for a folder by name
+query = "mimeType='application/vnd.google-apps.folder' and name contains 'folder name'"
+</code></pre>
+<br>
+										<div class="content">
+											<p>
+												Notice that even if you know exactly where an item is, you must still perform a search to get to it.
+												If you wanted to retrieve an image within a specific folder, you would have to perform the above search to get the folder ID, then perform ANOTHER search restricted to that folder ID to find the image.
+											</p>
+											<br>
+										</div>	
+											
+									<!-- Preformatted Code -->
+									<pre><code>
+# searching for image within a specified folder (assume 'folder' in the following code is the retrieved folder ID)
+query = "mimeType='image/JPEG' and parents in '" + folder + "'"
+										</code></pre>
+										<br>
+
+										<div class="content">
+											<p>
+												For this project, I wanted to alternate between a generic post of a sea turtle, and a post advertising a product. 
+												To do this, I made a super simple "history" class that would be serialized (saved in a file) after each run.
+												Below you can see the default history class.
+												The variable 'post_type' switches between True (turtle post) and False (product post).
+												The variables 'turtle_history' and 'product_history' represent post number 'x' in the turtle or product folder (currently 20 posts each).
+												They are incremented before each use, so on the first run It will prepare turtle post number 1.
+											</p>
+											<br>
+										</div>	
+
+										<!-- Preformatted Code -->
+										<pre><code>
+class History:
+	post_type = True        # turtle post (True) or product post (False)
+	turtle_history = 0      # last turtle post used
+	product_history = 0     # last product post used
+										</code></pre>
+										<br>
+
+										<div class="content">
+											<p>
+												In conclusion, the most challening thing about this project was taking the time to learn to use the tools I decided to work with, primarily the Google Drive API.
+												I had to spend a lot of time reading and re-reading the documentation and experimenting with the API in order to learn how to authenticate, navigate files, and upload/download files.
+												If you'd like to see more of this code check it out on Github <a href="https://github.com/wdlord/drive-instagram-uploader"target="_blank">here</a>.
+											</p>
+										</div>
+											
+								</section>
+							</div>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+				<div id="sidebar">
+					<div class="inner">
+
+						<!-- Menu -->
+							<nav id="menu">
+								<header class="major">
+									<h2>Menu</h2>
+								</header>
+								<ul>
+									<li><a href="index.html">Homepage</a></li>
+									<li>
+										<span class="opener">Projects</span>
+										<ul>
+											<li><a href="teleportPanic.html">Teleport Panic</a></li>
+											<li><a href="instaUploader.html">Drive to Instagram Uploader</a></li>
+											<li><a href="honorsProject.html">University Honors Project</a></li>
+											<li><a href="rainyDay.html">Rainy Day Bot</a></li>
+										</ul>
+									</li>
+								</ul>
+							</nav>
+
+						
+
+						<!-- Section -->
+							<section>
+								<header class="major">
+									<h2>Get in touch</h2>
+								</header>
+								<p>
+									The best way to get in touch with me is by sending me an email at the address shown below, or if you have my resume the address listed there works fine as well.
+								</p>
+								<ul class="contact">
+									<li class="icon solid fa-envelope"><a href="mailto:wdlordcontact@gmail.com">wdlordcontact@gmail.com</a></li>
+								</ul>
+							</section>
+
+						<!-- Footer -->
+							<footer id="footer">
+								<p class="copyright">&copy; Untitled. All rights reserved. Demo Images: <a href="https://unsplash.com">Unsplash</a>. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+							</footer>
+
+					</div>
+				</div>
+
+		</div>
+
+	<!-- Scripts -->
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>William Lord Programming Portfolio</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+								<header id="header">
+									<a href="index.html" class="logo"><strong>William Lord</strong> | Programming Portfolio</a>
+									<ul class="icons">
+										<li><a href="https://github.com/wdlord"target="_blank" class="icon brands fa-github"><span class="label">Github</span></a></li>
+									</ul>
+								</header>
+
+							<!-- Banner -->
+								<section id="banner">
+									<div class="content">
+										<header>
+											<h1>University Honors Project</h1>
+											<p>Made in C++</p>
+										</header>
+										<p>
+											At ASU, an Honors Enrichment Contract is an agreement between an honors student and a professor to complete something above and beyond the normal class content.
+											My Data Structures and Algorithms professor asked that I complete a C++ project that organized data as hospital patients, each with a unique priority. 
+											The project is in a state where I could turn it in as finished, but I will continue to improve it until the deadline.
+											I determined that the best structure to implement for this particular problem would be a special kind of binary tree called a treap.
+										</p>
+										<ul class="actions">
+											<li><a href="https://github.com/wdlord/310-Honors-Project"target="_blank" class="button big">View the code on Github</a></li>
+										</ul>
+									</div>
+									<span class="image object">
+										<img src="images/HPoutput.JPG" alt="" />
+									</span>
+								</section>
+
+							
+							<!-- Section -->
+							<div id="projects">
+								<section>
+									<header class="major">
+										<h2>About the Project</h2>
+									</header>
+									<div class="content">
+										<p>
+											In this project I used C++ to create a treap data structure. 
+											A treap is a combination between a binary tree and a heap.
+											Each node in the treap is given a random 'priority' that must follow the heap property (items above must be larger and items below must be smaller).
+											The priority is used to balance the tree after an item is inserted.
+											The reason we do this is to ensure that none of the branches of the tree are drastically longer than any other, as that would ruin search times and defeat the purpose of using a binary tree.
+										</p>
+										<span class="image object">
+											<img src="images/FlowchartCropped.jpeg" alt="" />
+										</span>
+										<p>
+											One of the things that sticks out to me about this project is how I ended up designing the algorithms needed for searching, inserting, and deleting patients.
+											A binary tree like this has up to 2 children for every node, and because of that it can be a pain to write and read the code in an effective way.
+											If you were to write the code iteratively (using loops) you would have to write 2 nearly identical pieces of code, one for the left side of the tree and one for the right side.
+											While I started the project by trying to write iterative code, I would later replace it with recursive code.
+											Recursive code works by writing a function that calls itself.
+											Think of a Russian nesting doll, where every time you open it there's a smaller doll inside.
+											By using recursion I was able to write the same functions in half the space (sometimes less), because instead of writing code for each side I could just call the function on the left or right child.
+											Here's an example of a recursive function I used.
+										</p>
+
+<!-- Preformatted Code -->
+<pre><code>
+// function recursively finds the node with the specified key
+Patient* SpecialTree::recursiveSearch(const std::string& key, Patient* parentNode) {
+
+    // if we hit nullptr we know the node is not in the list
+    if (parentNode == nullptr) return nullptr;
+
+    // if the patient to delete will be on the left
+    else if (key.compare(parentNode->key) < 0) {
+        return recursiveSearch(key, parentNode->left);
+    }
+    // if patient to delete will be on the right
+    else if (key.compare(parentNode->key) > 0) {
+        return recursiveSearch(key, parentNode->right);
+    }
+    // only remaining option is that this node is the node we searched for
+    return parentNode;
+}
+</code></pre>
+<br>
+	
+
+										<p>
+											The biggest issue that I ran into was that my professor wanted me to write a function that printed the patients according to their priority.
+											The problem with this is that the priority variables in a treap are only meant to be used as a way to balance the tree, they are not meant to be accessed otherwise.
+											In fact, I found it very inconvenient to access this data.
+											I could not find a time efficient way to traverse the tree and print patients out in order.
+											Instead, I had to create an array of pointers to each node, sort that array by patient priority, then print it out.
+											This was more effective time-wise (still not great), but required me to take up more memory.
+										</p>
+										<p>
+											I actually suspect that she may have mistakenly asked for this, here's why. 
+											One of the functions she asked for was a function that returned the least urgent patient.
+											For this, she provided instructions: "right-most leaf node."
+											The problem is that this would not work.
+											The right-most leaf node is not guaranteed to contain the patient with the lowest priority.
+											The right-most leaf node would contain the patient with the largest key.
+											I am certain that the tree was not meant to be organized by priority because the actual search function searches by key and not by priority.
+											I asked her about this and she seemed to be confused by it as well, but suggested I just ensure that the functions produce the expected result.
+											In order to correctly implement this function, I just compared the data in all of the leaf nodes, as the heap property guarantees that one of those must be the lowest priority.
+										</p>
+										<br>
+										<!-- Preformatted Code -->
+									<pre><code>
+// recursively travels the tree and compares all leaf nodes to find lowest priority
+void recursiveLeastUrgent(Patient* node, std::string& lowestPriority, std::string& patientInfo) {
+
+    // recur down left side of tree searching for lowest priority
+    if (node->left != nullptr) {
+        recursiveLeastUrgent(node->left, lowestPriority, patientInfo);
+    }
+
+    // recur down right side of tree searching for lowest priority
+    if (node->right != nullptr) {
+        recursiveLeastUrgent(node->right, lowestPriority, patientInfo);
+    }
+
+    // compare priorities on leaves only
+    else if (lowestPriority.compare(node->priority) < 0) {
+        lowestPriority = node->priority;    // track lowest priority
+        patientInfo = node->key;            // track info of node with lowest priority (this is what we want)
+    }
+}
+</code></pre>
+<br>
+
+										<p>
+											My professor required that in addition to being random, the priorities must all be unique.
+											Because of this, I could not just use a standard randomizing function.
+											Instead, I created a vector of all the possible priorities and shuffled them into a random order.
+											I then iterated along the vector of priorities so that they would not repeat.
+											Once it runs out of distinct priorities, the user is notified that they are allowed to continue but priorities will now repeat.
+										</p>
+										<!-- Preformatted Code -->
+									<pre><code>
+// generate pool of distinct priorities to pull from (number will later be split and used in a string)
+for (int i = 10; i <= 40; i++) {
+	randomNumbers.push_back(i);
+}
+										</code></pre>
+										<br>
+
+										<p>
+											Priorities must look something like 'P3L1', with P ranging between 1 and 4, and L ranging between 0 and 9.
+											P4 does not have any sub-level because it represents a dead patient.
+											You can see above I chose to generate a 2 digit number between 10 (P1L0) and 40 (P4).
+											In the next code snippet you can see how I turned that into a usable priority string.
+										</p>
+
+										<!-- Preformatted Code -->
+									<pre><code>
+// generates a priority at random (format of P#L#)
+std::string SpecialTree::generatePriority() {
+
+    // there are only so many non-repeating numbers (30), if we exceed that amount we reshuffle and allow repetition
+    if (rnIndex > 30) {
+        std::cout << "exhausted list of non-repeating priorities, priorities may now repeat.";
+        random_shuffle(randomNumbers.begin(), randomNumbers.end());
+        rnIndex = 0;
+    }
+
+    // we work through an array of randomly shuffled, unique priorities.
+    int temp = randomNumbers[rnIndex];
+    std::string priority = "P";
+
+    // priority 4 (dead) has no level so must be handled differently
+    if (temp == 40) priority = "P4";
+
+    // standard priorities
+    else {
+        priority += std::to_string(temp / 10);
+        priority += "L";
+        priority += std::to_string(temp % 10);
+    }
+
+    rnIndex++;	// without this we would just use the same number every time
+    return priority;
+}
+										</code></pre>
+										<br>
+										<p>
+											The final thing I'll talk about is something that I did to make it easier for the graders to test my program.
+											The patient key should look as follows: "FirstName,LastName,M/F,MM/DD/YYYY".
+											In order to both ensure inputs of the correct format and make things easier for graders, when a patient is inserted I randomly generate this patient information.
+											To do this, I included files of first names and last names.
+											Believe it or not, the teacher also requested that the keys be distinct, so I just implemented a system similar to the one used for priorities to randomly select the names.
+											I did not notify the user if the name list was reshuffled because the gender and date were also chosen at random.
+											This made it so that the keys were extremely unlikely to be repeated, and for the practical purposes of this program it just wasn't going to happen.
+											Even if it did, there is a check in place to prevent adding an existing patient.
+											The only awkwardness in this system is that the patients randomly generated name will sometimes not match their randomly selected gender.
+											I won't show the code for this part because it's fairly similar to the last code snippet I showed.
+										</p>
+										<p>
+											This project is actually not yet due, so even though I could turn it in as is, I will probably continue to improve on it so don't be too surprised to see this page changing as time goes by.
+											For now though, I feel that this work at least represents that I can work in C++ and shows that I am familiar with data structures because I am enrolled in the class and I implement one in this program.
+											Some things are not as clean as I would like them to be, but for now this is what the project looks like. You can check out the Github repository <a href="https://github.com/wdlord/310-Honors-Project"target="_blank">here</a>.
+										</p>
+										
+										<br>
+									</div>
+
+								</section>
+							</div>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+				<div id="sidebar">
+					<div class="inner">
+
+						<!-- Menu -->
+							<nav id="menu">
+								<header class="major">
+									<h2>Menu</h2>
+								</header>
+								<ul>
+									<li><a href="index.html">Homepage</a></li>
+									<li>
+										<span class="opener">Projects</span>
+										<ul>
+											<li><a href="teleportPanic.html">Teleport Panic</a></li>
+											<li><a href="instaUploader.html">Drive to Instagram Uploader</a></li>
+											<li><a href="honorsProject.html">University Honors Project</a></li>
+											<li><a href="rainyDay.html">Rainy Day Bot</a></li>
+										</ul>
+									</li>
+								</ul>
+							</nav>
+
+						
+
+						<!-- Section -->
+							<section>
+								<header class="major">
+									<h2>Get in touch</h2>
+								</header>
+								<p>
+									The best way to get in touch with me is by sending me an email at the address shown below, or if you have my resume the address listed there works fine as well.
+								</p>
+								<ul class="contact">
+									<li class="icon solid fa-envelope"><a href="mailto:wdlordcontact@gmail.com">wdlordcontact@gmail.com</a></li>
+								</ul>
+							</section>
+
+						<!-- Footer -->
+							<footer id="footer">
+								<p class="copyright">&copy; Untitled. All rights reserved. Demo Images: <a href="https://unsplash.com">Unsplash</a>. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+							</footer>
+
+					</div>
+				</div>
+
+		</div>
+
+	<!-- Scripts -->
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
+
+</body>
+</html>
